@@ -82,6 +82,19 @@ while ($i < $length)
 
             //skip closing quote
             $i++;
+            break;
+        case ($char === '-'):
+        case (ctype_digit($char)):
+            $start = $i;
+
+            while($i < $length && ctype_digit($file[$i]))
+            {
+                $i++;
+            }
+
+            $num_value = substr($file, $start, $i - $start); 
+            $tokens[] = ['TYPE' => TokenType::NUMBER, 'VALUE' => $num_value]; 
+            break;
     }
 }
 
