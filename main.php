@@ -83,19 +83,56 @@ while ($i < $length)
             //skip closing quote
             $i++;
             break;
-        case ($char === '-'):
-        case (ctype_digit($char)):
-            $start = $i;
+        switch(true){
+            case ($char === '-'):
+            case (ctype_digit($char)):
+                $start = $i;
 
-            while($i < $length && ctype_digit($file[$i]))
-            {
-                $i++;
-            }
+                while($i < $length && ctype_digit($file[$i]))
+                {
+                    $i++;
+                }
 
-            $num_value = substr($file, $start, $i - $start); 
-            $tokens[] = ['TYPE' => TokenType::NUMBER, 'VALUE' => $num_value]; 
-            break;
+                $num_value = substr($file, $start, $i - $start); 
+                $tokens[] = ['TYPE' => TokenType::NUMBER, 'VALUE' => $num_value]; 
+                break;
+        }
     }
 }
 
-var_dump($tokens);
+$accumulator = [];
+$i = 0;
+
+function parseObject(&$i)
+{
+    $accumulator = [];
+    $i++;
+    return parseMembers($i, $accumulator);
+}
+
+function parseMembers(&$i, $accumulator)
+{  
+
+}
+
+function parsePair()
+{
+
+}
+
+function parseValue()
+{
+
+}
+
+// while($i < $length)
+// {
+//     switch($tokens[$i]['TYPE'])
+//     {
+//         case TokenType::LEFT_BRACKET:
+//             $i++;
+//             break;
+//         case TokenType::STRING:
+
+//     }
+// }
