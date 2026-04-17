@@ -1,5 +1,6 @@
 {
     "hello" : "world",
     "hi" : "hello",
+    "bomba" : [1, 2, "HELLO"],
     "SKi" : 10
 }

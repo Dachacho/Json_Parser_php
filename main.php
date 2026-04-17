@@ -2,13 +2,15 @@
 
 enum TokenType
 {
-    case LEFT_BRACKET;
-    case RIGHT_BRACKET;
+    case OPEN_CURLY;
+    case CLOSE_CURLY;
     case STRING;
     case NUMBER;
     case COMMA;
     case COLON;
     case QUOTE;
+    case OPEN_BRACKET;
+    case CLOSE_BRACKET;
 }
 
 $file = '';
@@ -36,11 +38,11 @@ while ($i < $length)
             break; 
         case($char === '{'):
             $i++;
-            $tokens[] = ['TYPE' => TokenType::LEFT_BRACKET, 'VALUE' => '{'];
+            $tokens[] = ['TYPE' => TokenType::OPEN_CURLY, 'VALUE' => '{'];
             break;
         case($char === '}'):
             $i++;
-            $tokens[] = ['TYPE' => TokenType::RIGHT_BRACKET, 'VALUE' => '}'];
+            $tokens[] = ['TYPE' => TokenType::CLOSE_CURLY, 'VALUE' => '}'];
             break; 
         case($char === ':'):
             $i++;
@@ -49,6 +51,14 @@ while ($i < $length)
         case($char === ','):
             $i++;
             $tokens[] = ['TYPE' => TokenType::COMMA, 'VALUE' => ','];
+            break;
+        case ($char === '['):
+            $i++;
+            $tokens[] = ['TYPE' => TokenType::OPEN_BRACKET, 'VALUE' => '['];
+            break;
+        case ($char === ']'):
+            $i++;
+            $tokens[] = ['TYPE' => TokenType::CLOSE_BRACKET, 'VALUE' => ']'];
             break;
         case($char === '"'):
             //skip first quote
@@ -108,7 +118,7 @@ function parse_object(&$i, $tokens)
 
 function parse_members(&$i, $tokens, $acc)
 {  
-    if($tokens[$i]['TYPE'] === TokenType::RIGHT_BRACKET)
+    if($tokens[$i]['TYPE'] === TokenType::CLOSE_CURLY)
     {
         $i++;
         return $acc;
@@ -124,7 +134,7 @@ function parse_members(&$i, $tokens, $acc)
         $acc[$key] = $value; 
     } 
 
-    if($tokens[$i]['TYPE'] !== TokenType::RIGHT_BRACKET)
+    if($tokens[$i]['TYPE'] !== TokenType::CLOSE_CURLY)
     {
         throw new Exception("Expected '}' at the end");
     }
@@ -151,6 +161,27 @@ function parse_pair(&$i, $tokens)
     return [$key, $value];
 }
 
+function parse_array(&$i, $tokens)
+{
+    $i++;
+
+    $acc[] = parse_value($i, $tokens);
+
+    while($tokens[$i]['TYPE'] === TokenType::COMMA)
+    {
+        $i++;
+        $acc[] = parse_value($i, $tokens);
+    } 
+
+    if($tokens[$i]['TYPE'] !== TokenType::CLOSE_BRACKET)
+    {
+        throw new Exception("Expected ']' at the end");
+    }
+
+    $i++;
+    return $acc;
+}
+
 function parse_value(&$i, $tokens)
 {
     $token = $tokens[$i];
@@ -163,8 +194,10 @@ function parse_value(&$i, $tokens)
         case TokenType::NUMBER:
             $i++;
             return (int)$token['VALUE'];
-        case TokenType::LEFT_BRACKET:
+        case TokenType::OPEN_CURLY:
             return parse_object($i, $tokens);
+        case TokenType::OPEN_BRACKET:
+            return parse_array($i, $tokens);
         default:
             throw new Exception("Unexpected token");
     }
