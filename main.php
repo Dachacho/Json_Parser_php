@@ -11,6 +11,9 @@ enum TokenType
     case QUOTE;
     case OPEN_BRACKET;
     case CLOSE_BRACKET;
+    case TRUE;
+    case FALSE;
+    case NULL;
 }
 
 $file = '';
@@ -104,6 +107,30 @@ while ($i < $length)
             $num_value = substr($file, $start, $i - $start); 
             $tokens[] = ['TYPE' => TokenType::NUMBER, 'VALUE' => $num_value]; 
             break;
+        case ctype_alpha($char):
+            $start = $i;
+
+            while($i < $length && ctype_alpha($file[$i]))
+            {
+                $i++;
+            }
+
+            $word = substr($file, $start, $i - $start);
+
+            switch($word)
+            {
+                case 'true':
+                   $tokens[] = ['TYPE' => TokenType::TRUE, 'VALUE' => true];  
+                   break;
+                case 'false':
+                    $tokens[] = ['TYPE' => TokenType::FALSE, 'VALUE' => false]; 
+                    break;
+                case 'null':
+                    $tokens[] = ['TYPE' => TokenType::NULL, 'VALUE' => null];
+                    break;
+                default:
+                    throw new Exception("Unexpected token at $start");
+            }
     }
 }
 
@@ -194,6 +221,17 @@ function parse_value(&$i, $tokens)
         case TokenType::NUMBER:
             $i++;
             return (int)$token['VALUE'];
+
+        case TokenType::TRUE:
+            $i++;
+            return true;
+        case TokenType::FALSE:
+            $i++;
+            return false;
+        case TokenType::NULL:
+            $i++;
+            return null;
+
         case TokenType::OPEN_CURLY:
             return parse_object($i, $tokens);
         case TokenType::OPEN_BRACKET:
